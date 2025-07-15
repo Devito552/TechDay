@@ -1,410 +1,228 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hub de Ferramentas Digitais | SENAI & Google</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chosen Palette: Warm Neutrals with Amber Accent -->
-    <!-- Application Structure Plan: A hub-and-spoke model was chosen for the application's structure. A main, icon-based navigation allows users to select a tool, which dynamically populates a central content area. This non-linear approach empowers teachers to explore tools based on their immediate interests, rather than following a rigid, linear presentation. The structure includes an introduction, the interactive tool explorer, a comparative radar chart to provide a quick analytical overview, a summary of general benefits, and a call to action. This was chosen to transform the static report into a user-driven exploratory experience, enhancing usability and engagement. -->
-    <!-- Visualization & Content Choices: Report Info: Tool descriptions, benefits, examples. Goal: Inform, Compare. Viz/Presentation Method: Interactive icon-based navigation (HTML/CSS/JS) to select tools, dynamic content cards (HTML/JS) for details, and a Radar Chart (Chart.js/Canvas) for comparison. Interaction: Clicks on tool icons update the content area and the chart, allowing users to cross-reference textual information with a visual summary. Justification: This approach turns passive text into an active experience. The Radar Chart is ideal for comparing multiple tools across several qualitative criteria (like collaboration, organization), providing an immediate "at-a-glance" understanding that text alone cannot offer. This adds a new layer of data analysis to the original report. Library/Method: Vanilla JS for DOM manipulation and state, Chart.js for visualization. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 650px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 350px;
-            max-height: 400px;
-        }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 500px;
-                max-height: 500px;
-            }
-        }
-        .nav-button.active {
-            background-color: #f59e0b;
-            color: white;
-            transform: translateY(-4px);
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hub de Ferramentas Digitais | SENAI & Google</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+    .chart-container {
+      position: relative;
+      width: 100%;
+      max-width: 650px;
+      margin-left: auto;
+      margin-right: auto;
+      height: 350px;
+      max-height: 400px;
+    }
+    @media (min-width: 768px) {
+      .chart-container {
+        height: 500px;
+        max-height: 500px;
+      }
+    }
+    .nav-button.active {
+      background-color: #f59e0b;
+      color: white;
+      transform: scale(1.05);
+      border-color: #d97706;
+      box-shadow: 0 6px 10px -1px rgba(0, 0, 0, 0.2);
+    }
+    #tool-content {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+  </style>
 </head>
 <body class="bg-stone-50 text-stone-800">
+  <div class="container mx-auto max-w-6xl p-4 sm:p-8">
+    <header class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-amber-600 mb-2">Potencialize a Educação no SENAI</h1>
+      <p class="text-lg text-stone-600">Explore o ecossistema de ferramentas Google e Canva, uma parceria para inovar e transformar o ensino.</p>
+    </header>
+    <main>
+      <section id="explorer" class="mb-16">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
+          <div class="text-center mb-8">
+            <h2 class="text-2xl font-bold text-stone-800">Seu Kit de Ferramentas Digitais</h2>
+            <p class="text-stone-500 mt-1">Clique em um ícone para descobrir como cada ferramenta pode revolucionar sua rotina.</p>
+          </div>
 
-    <div class="container mx-auto max-w-6xl p-4 sm:p-8">
+          <nav id="tool-nav" class="flex flex-wrap justify-center gap-3 sm:gap-4 mb-4"></nav>
 
-        <header class="text-center mb-12">
-            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-amber-600 mb-2">Potencialize a Educação no SENAI</h1>
-            <p class="text-lg text-stone-600">Explore o ecossistema de ferramentas Google e Canva, uma parceria para inovar e transformar o ensino.</p>
-        </header>
+          <div class="flex justify-center mt-4 mb-8">
+            <button id="randomToolBtn" class="text-sm font-medium text-amber-600 hover:underline">Me surpreenda com uma ferramenta</button>
+          </div>
 
-        <main>
-            <section id="explorer" class="mb-16">
-                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200">
-                    <div class="text-center mb-8">
-                        <h2 class="text-2xl font-bold text-stone-800">Seu Kit de Ferramentas Digitais</h2>
-                        <p class="text-stone-500 mt-1">Clique em um ícone para descobrir como cada ferramenta pode revolucionar sua rotina.</p>
-                    </div>
-
-                    <nav id="tool-nav" class="flex flex-wrap justify-center gap-3 sm:gap-4 mb-8">
-                    </nav>
-
-                    <div id="tool-content" class="min-h-[300px] transition-opacity duration-300">
-                    </div>
-                </div>
-            </section>
-            
-            <section id="comparison" class="mb-16">
-                 <div class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800">Comparativo de Ferramentas</h2>
-                    <p class="text-stone-500 mt-1">Visualize os pontos fortes de cada ferramenta para diferentes objetivos pedagógicos. Passe o mouse sobre o gráfico para ver os detalhes.</p>
-                </div>
-                <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-stone-200">
-                    <div class="chart-container">
-                        <canvas id="toolComparisonChart"></canvas>
-                    </div>
-                </div>
-            </section>
-
-            <section id="general-benefits" class="mb-16">
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-stone-800">Benefícios da Parceria para Você</h2>
-                    <p class="text-stone-500 mt-1">A união da tecnologia com a educação traz vantagens que vão além da sala de aula.</p>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
-                        <h3 class="font-bold text-lg text-amber-600 mb-2">Aumento da Produtividade</h3>
-                        <p class="text-stone-600">Otimize o tempo gasto em tarefas administrativas e na preparação de aulas, focando no que realmente importa: ensinar.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
-                        <h3 class="font-bold text-lg text-amber-600 mb-2">Promoção da Colaboração</h3>
-                        <p class="text-stone-600">Facilite o trabalho em equipe entre professores e crie ambientes de aprendizado colaborativo para os alunos.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
-                        <h3 class="font-bold text-lg text-amber-600 mb-2">Estímulo à Inovação</h3>
-                        <p class="text-stone-600">Explore novas metodologias de ensino com o apoio de ferramentas tecnológicas de ponta, tornando as aulas mais criativas.</p>
-                    </div>
-                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
-                        <h3 class="font-bold text-lg text-amber-600 mb-2">Acessibilidade e Flexibilidade</h3>
-                        <p class="text-stone-600">Trabalhe de onde quiser e a qualquer momento, com todos os seus arquivos e materiais seguros e sempre disponíveis na nuvem.</p>
-                    </div>
-                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
-                        <h3 class="font-bold text-lg text-amber-600 mb-2">Engajamento dos Alunos</h3>
-                        <p class="text-stone-600">Crie aulas mais dinâmicas, interativas e visualmente atraentes que capturam a atenção e o interesse dos estudantes.</p>
-                    </div>
-                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
-                        <h3 class="font-bold text-lg text-amber-600 mb-2">Desenvolvimento Profissional</h3>
-                        <p class="text-stone-600">Mantenha-se atualizado com as tendências tecnológicas na educação, aprimorando suas competências digitais.</p>
-                    </div>
-                </div>
-            </section>
-            
-            <footer class="text-center bg-white p-8 rounded-2xl shadow-sm border border-stone-200">
-                 <h2 class="text-2xl font-bold text-stone-800">Prontos para Começar?</h2>
-                 <p class="text-stone-500 mt-2 mb-4">Esta parceria é um convite para transformarmos juntos a educação no SENAI. Comece a explorar hoje mesmo!</p>
-                 <button class="bg-amber-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-amber-600 transition-colors">Experimente Agora</button>
-            </footer>
-
+          <div id="tool-content" class="min-h-[300px] transition-opacity duration-300"></div>
         </div>
-    </div>
+      </section>
+      <section id="comparison" class="mb-16">
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-bold text-stone-800">Comparativo de Ferramentas</h2>
+          <p class="text-stone-500 mt-1">Visualize os pontos fortes de cada ferramenta para diferentes objetivos pedagógicos. Passe o mouse sobre o gráfico para ver os detalhes.</p>
+        </div>
+        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-stone-200">
+          <div class="chart-container">
+            <canvas id="toolComparisonChart"></canvas>
+          </div>
+        </div>
+      </section>
 
-<script>
-document.addEventListener('DOMContentLoaded', () => {
+      <section id="general-benefits" class="mb-16">
+        <div class="text-center mb-8">
+          <h2 class="text-2xl font-bold text-stone-800">Benefícios da Parceria para Você</h2>
+          <p class="text-stone-500 mt-1">A união da tecnologia com a educação traz vantagens que vão além da sala de aula.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+            <h3 class="font-bold text-lg text-amber-600 mb-2">Aumento da Produtividade</h3>
+            <p class="text-stone-600">Otimize o tempo gasto em tarefas administrativas e na preparação de aulas, focando no que realmente importa: ensinar.</p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+            <h3 class="font-bold text-lg text-amber-600 mb-2">Promoção da Colaboração</h3>
+            <p class="text-stone-600">Facilite o trabalho em equipe entre professores e crie ambientes de aprendizado colaborativo para os alunos.</p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+            <h3 class="font-bold text-lg text-amber-600 mb-2">Estímulo à Inovação</h3>
+            <p class="text-stone-600">Explore novas metodologias de ensino com o apoio de ferramentas tecnológicas de ponta, tornando as aulas mais criativas.</p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+            <h3 class="font-bold text-lg text-amber-600 mb-2">Acessibilidade e Flexibilidade</h3>
+            <p class="text-stone-600">Trabalhe de onde quiser e a qualquer momento, com todos os seus arquivos e materiais seguros e sempre disponíveis na nuvem.</p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+            <h3 class="font-bold text-lg text-amber-600 mb-2">Engajamento dos Alunos</h3>
+            <p class="text-stone-600">Crie aulas mais dinâmicas, interativas e visualmente atraentes que capturam a atenção e o interesse dos estudantes.</p>
+          </div>
+          <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-200 hover:shadow-md transition-shadow">
+            <h3 class="font-bold text-lg text-amber-600 mb-2">Desenvolvimento Profissional</h3>
+            <p class="text-stone-600">Mantenha-se atualizado com as tendências tecnológicas na educação, aprimorando suas competências digitais.</p>
+          </div>
+        </div>
+      </section>
+      <footer class="text-center bg-white p-8 rounded-2xl shadow-sm border border-stone-200">
+        <h2 class="text-2xl font-bold text-stone-800">Prontos para Começar?</h2>
+        <p class="text-stone-500 mt-2 mb-4">Esta parceria é um convite para transformarmos juntos a educação no SENAI. Comece a explorar hoje mesmo!</p>
+        <button class="bg-amber-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-amber-600 transition-colors">Experimente Agora</button>
+      </footer>
+    </main>
+  </div>
 
-    const toolData = {
-        docs: {
-            name: "Google Docs",
-            icon: "📄",
-            description: "Processador de texto online, gratuito e poderoso para criar documentos de forma colaborativa.",
-            benefits: [
-                "Crie e edite planos de aula, roteiros e atividades com colegas simultaneamente.",
-                "Dê sugestões e comentários diretos nos trabalhos dos alunos, facilitando a revisão.",
-                "Nunca perca uma alteração; acesse o histórico completo de revisões.",
-                "Trabalhe de qualquer lugar, a qualquer hora, em qualquer dispositivo."
-            ],
-            examples: [
-                "Elaborar provas e exercícios em equipe.",
-                "Criar projetos de pesquisa colaborativos com os alunos.",
-                "Desenvolver materiais de apoio para as aulas."
-            ],
-            exercise_creation_tips: [
-                "Crie atividades de escrita colaborativa, roteiros para trabalhos de pesquisa em grupo, ou modelos de preenchimento.",
-                "Use a função de comentários para feedback direto e contextualizado nos trabalhos dos alunos."
-            ]
-        },
-        sheets: {
-            name: "Google Planilhas",
-            icon: "📊",
-            description: "Ferramenta para criar e gerenciar planilhas eletrônicas, organizar dados e analisar informações.",
-            benefits: [
-                "Organize o desempenho dos alunos de forma clara e automatizada com gestão de notas e frequência.",
-                "Identifique padrões de aprendizado e áreas que precisam de mais atenção na turma.",
-                "Utilize templates para horários de aula, controle de projetos e mais.",
-                "Colete dados via Formulários e os visualize automaticamente nas planilhas."
-            ],
-            examples: [
-                "Diário de classe digital.",
-                "Controle de entrega de atividades e projetos.",
-                "Registro e análise de resultados de avaliações."
-            ],
-            exercise_creation_tips: [
-                "Desenvolva exercícios de análise de dados, simulações financeiras ou organização de informações.",
-                "Permita que os alunos manipulem dados e criem gráficos diretamente na planilha online."
-            ]
-        },
-        slides: {
-            name: "Google Apresentações",
-            icon: "🖼️",
-            description: "Ferramenta para criar apresentações de slides online, dinâmicas e colaborativas.",
-            benefits: [
-                "Prepare aulas e materiais visuais com outros professores ou permita que os alunos desenvolvam trabalhos em grupo.",
-                "Crie slides visualmente atraentes com facilidade, usando templates e recursos visuais.",
-                "Insira vídeos, imagens e áudios diretamente nos slides para aulas mais dinâmicas.",
-                "Compartilhe e apresente facilmente em aulas online ou presenciais."
-            ],
-            examples: [
-                "Aulas expositivas interativas.",
-                "Apresentações de projetos e seminários dos alunos.",
-                "Criação de tutoriais visuais."
-            ],
-            exercise_creation_tips: [
-                "Proponha a criação de apresentações como forma de entrega de projetos ou seminários pelos alunos.",
-                "Crie slides interativos com perguntas e espaços para respostas, incentivando a participação ativa."
-            ]
-        },
-        forms: {
-            name: "Google Formulários",
-            icon: "✅",
-            description: "Ferramenta para criar questionários, pesquisas, enquetes e provas de forma inteligente.",
-            benefits: [
-                "Elabore pesquisas e avaliações em minutos, com diversos tipos de perguntas.",
-                "Economize tempo precioso com a correção automática para questões de múltipla escolha.",
-                "Forneça feedback instantâneo aos alunos, que podem receber o resultado na hora.",
-                "Analise o desempenho da turma com gráficos e relatórios automáticos."
-            ],
-            examples: [
-                "Avaliações diagnósticas e somativas.",
-                "Pesquisas de satisfação sobre a aula ou metodologias.",
-                "Inscrições para atividades extracurriculares ou eventos."
-            ],
-            exercise_creation_tips: [
-                "Crie provas, questionários e quizzes com correção automática para agilizar o processo de avaliação.",
-                "Use diferentes tipos de perguntas (múltipla escolha, resposta curta, etc.) e configure feedback instantâneo para os alunos."
-            ]
-        },
-        drive: {
-            name: "Google Drive",
-            icon: "☁️",
-            description: "Seu escritório na nuvem: um local seguro para armazenar e acessar todos os seus arquivos.",
-            benefits: [
-                "Tenha todos os seus materiais (planos de aula, provas, trabalhos) centralizados em um só lugar.",
-                "Acesse seus arquivos de qualquer dispositivo (computador, tablet, celular) com conexão à internet.",
-                "Compartilhe pastas ou arquivos específicos com controle total de permissões.",
-                "Mantenha seus arquivos protegidos contra perdas com segurança e backup automático."
-            ],
-            examples: [
-                "Organizar pastas por turmas, disciplinas ou projetos.",
-                "Compartilhar materiais de estudo e leituras com os alunos.",
-                "Armazenar backups de aulas e projetos importantes."
-            ],
-            exercise_creation_tips: [
-                "Organize e distribua exercícios para os alunos e colete os trabalhos entregues através de pastas compartilhadas.",
-                "Facilita o acesso e a gestão de todos os materiais didáticos e atividades propostas."
-            ]
-        },
-        vids: {
-            name: "Google Vids",
-            icon: "🎥",
-            description: "Ferramenta de criação de vídeo baseada em Inteligência Artificial para produzir conteúdo profissional.",
-            benefits: [
-                "Produza vídeos educacionais sem a necessidade de softwares complexos ou experiência prévia.",
-                "Utilize a IA para ajudar na roteirização, edição e produção, otimizando seu tempo.",
-                "Engaje alunos com conteúdos dinâmicos e visuais, uma forma poderosa de ensinar.",
-                "Crie vídeos com aparência profissional para apresentações, tutoriais e mais."
-            ],
-            examples: [
-                "Criar tutoriais rápidos para explicar conceitos complexos.",
-                "Produzir introduções dinâmicas para novos módulos.",
-                "Gravar explicações sobre projetos ou atividades."
-            ],
-            exercise_creation_tips: [
-                "Desafie os alunos a criar vídeos explicativos sobre conceitos aprendidos ou para apresentar projetos.",
-                "Você pode criar tutoriais em vídeo e propor atividades que os alunos devem responder após assistir ao conteúdo."
-            ]
-        },
-        canva: {
-            name: "Canva Pro",
-            icon: "✨",
-            description: "Plataforma de design gráfico com recursos avançados para criar materiais visualmente impactantes.",
-            benefits: [
-                "Produza materiais didáticos, infográficos e pôsteres com design profissional.",
-                "Acesse uma vasta biblioteca de modelos prontos para diversas finalidades, acelerando sua criação.",
-                "Utilize um banco ilimitado de imagens, vídeos, ícones e fontes premium.",
-                "Crie materiais padronizados para sua disciplina, turma ou eventos do SENAI."
-            ],
-            examples: [
-                "Desenvolver infográficos para resumir conteúdos.",
-                "Criar cartazes e banners para eventos escolares.",
-                "Elaborar materiais visuais personalizados para aulas."
-            ],
-            exercise_creation_tips: [
-                "Incentive os alunos a criar infográficos, pôsteres ou resumos visuais de conteúdo como forma de demonstração de aprendizado.",
-                "Crie templates de atividades visuais para eles preencherem, como mapas mentais ou diagramas interativos."
-            ]
-        },
-        sites: {
-            name: "Google Sites",
-            icon: "🌐",
-            description: "Ferramenta para criar websites simples e intuitivos, sem necessidade de programação, ideal para organizar informações.",
-            benefits: [
-                "Crie portais de disciplina, wikis de projetos ou páginas de recursos para alunos de forma fácil.",
-                "Organize materiais de aula, links úteis e calendários em um único local acessível.",
-                "Permita que alunos colaborem na criação de sites para projetos de grupo.",
-                "Publique informações importantes e comunicados de forma rápida e visualmente atraente."
-            ],
-            examples: [
-                "Criar um site para a disciplina com cronograma, materiais e links.",
-                "Desenvolver um portfólio digital para os alunos apresentarem seus trabalhos.",
-                "Construir um site de projeto onde os grupos de alunos podem colaborar e postar atualizações."
-            ],
-            exercise_creation_tips: [
-                "Proponha a criação de um 'mini-site' pelos alunos como um projeto final, onde eles organizam e apresentam o conteúdo aprendido.",
-                "Use o Sites para criar páginas com 'estações de trabalho' ou 'centros de aprendizado' onde os alunos navegam por diferentes atividades e recursos."
-            ]
-        }
-    };
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toolData = {
+        docs: { name: "Google Docs", icon: "📄", link: "https://docs.google.com", /* ... */ },
+        sheets: { name: "Google Planilhas", icon: "📊", link: "https://sheets.google.com", /* ... */ },
+        slides: { name: "Google Apresentações", icon: "🖼️", link: "https://slides.google.com", /* ... */ },
+        forms: { name: "Google Formulários", icon: "✅", link: "https://forms.google.com", /* ... */ },
+        drive: { name: "Google Drive", icon: "☁️", link: "https://drive.google.com", /* ... */ },
+        vids: { name: "Google Vids", icon: "🎥", link: "#", /* ... */ },
+        canva: { name: "Canva Pro", icon: "✨", link: "https://www.canva.com/edu/", /* ... */ },
+        sites: { name: "Google Sites", icon: "🌐", link: "https://sites.google.com", /* ... */ }
+      };
 
-    const toolNavContainer = document.getElementById('tool-nav');
-    const toolContentContainer = document.getElementById('tool-content');
-    
-    function displayTool(toolId) {
+      const toolNavContainer = document.getElementById('tool-nav');
+      const toolContentContainer = document.getElementById('tool-content');
+
+      function displayTool(toolId) {
         const tool = toolData[toolId];
         if (!tool) return;
-
         toolContentContainer.style.opacity = 0;
-        
+
         setTimeout(() => {
-            let benefitsHtml = tool.benefits.map(b => `<li class="flex items-start"><span class="text-green-500 mr-2 mt-1">✓</span><span>${b}</span></li>`).join('');
-            let examplesHtml = tool.examples.map(e => `<li class="flex items-start"><span class="text-amber-500 mr-2 mt-1">→</span><span>${e}</span></li>`).join('');
-            let exerciseTipsHtml = tool.exercise_creation_tips.map(t => `<li class="flex items-start"><span class="text-blue-500 mr-2 mt-1">💡</span><span>${t}</span></li>`).join('');
-            
-            toolContentContainer.innerHTML = `
-                <div class="text-center mb-6">
-                    <h3 class="text-3xl font-bold">${tool.name}</h3>
-                    <p class="text-stone-500 mt-1">${tool.description}</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-                    <div class="bg-stone-100/50 p-6 rounded-xl">
-                        <h4 class="font-bold text-lg mb-3 text-stone-700">Benefícios para o Professor</h4>
-                        <ul class="space-y-2 text-stone-600">${benefitsHtml}</ul>
-                    </div>
-                    <div class="bg-stone-100/50 p-6 rounded-xl">
-                        <h4 class="font-bold text-lg mb-3 text-stone-700">Exemplos de Uso Prático</h4>
-                        <ul class="space-y-2 text-stone-600">${examplesHtml}</ul>
-                    </div>
-                    <div class="bg-stone-100/50 p-6 rounded-xl">
-                        <h4 class="font-bold text-lg mb-3 text-stone-700">Criação de Exercícios Online</h4>
-                        <ul class="space-y-2 text-stone-600">${exerciseTipsHtml}</ul>
-                    </div>
-                </div>
-            `;
-            toolContentContainer.style.opacity = 1;
+          toolContentContainer.innerHTML = `
+            <div class="text-center mb-6">
+              <h3 class="text-3xl font-bold">${tool.name}</h3>
+              <p class="text-stone-500 mt-1">${tool.description || ''}</p>
+            </div>
+            <div class="text-center my-4">
+              <a href="${tool.link}" target="_blank" class="inline-block bg-amber-500 hover:bg-amber-600 text-white px-6 py-2 rounded-lg font-semibold transition">
+                Acessar ferramenta
+              </a>
+            </div>
+          `;
+          toolContentContainer.style.opacity = 1;
 
-            document.querySelectorAll('.nav-button').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.tool === toolId) {
-                    btn.classList.add('active');
-                }
-            });
+          document.querySelectorAll('.nav-button').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.tool === toolId) btn.classList.add('active');
+          });
         }, 150);
-    }
+      }
 
-    Object.keys(toolData).forEach(key => {
+      Object.keys(toolData).forEach(key => {
         const tool = toolData[key];
         const button = document.createElement('button');
         button.className = 'nav-button flex flex-col items-center justify-center w-24 h-24 sm:w-28 sm:h-28 bg-white rounded-2xl shadow-sm border border-stone-200 hover:bg-amber-100/50 hover:border-amber-300 transition-all duration-200';
         button.dataset.tool = key;
-        button.innerHTML = `
-            <span class="text-3xl sm:text-4xl">${tool.icon}</span>
-            <span class="text-xs sm:text-sm font-medium mt-2 text-stone-700">${tool.name}</span>
-        `;
+        button.setAttribute("aria-label", `Selecionar ferramenta ${tool.name}`);
+        button.innerHTML = `<span class="text-3xl sm:text-4xl">${tool.icon}</span><span class="text-xs sm:text-sm font-medium mt-2 text-stone-700">${tool.name}</span>`;
         button.addEventListener('click', () => displayTool(key));
         toolNavContainer.appendChild(button);
-    });
-    
-    displayTool('docs');
+      });
 
-    const chartData = {
-        labels: ['Colaboração', 'Organização', 'Criação de Conteúdo', 'Avaliação', 'Apresentação Visual'],
-        datasets: [
-            { label: 'Docs', data: [5, 3, 4, 2, 2], fill: true, backgroundColor: 'rgba(66, 133, 244, 0.2)', borderColor: 'rgb(66, 133, 244)', pointBackgroundColor: 'rgb(66, 133, 244)' },
-            { label: 'Planilhas', data: [4, 5, 2, 4, 3], fill: true, backgroundColor: 'rgba(15, 157, 88, 0.2)', borderColor: 'rgb(15, 157, 88)', pointBackgroundColor: 'rgb(15, 157, 88)' },
-            { label: 'Apresentações', data: [5, 3, 4, 2, 5], fill: true, backgroundColor: 'rgba(244, 180, 0, 0.2)', borderColor: 'rgb(244, 180, 0)', pointBackgroundColor: 'rgb(244, 180, 0)' },
-            { label: 'Formulários', data: [2, 4, 2, 5, 2], fill: true, backgroundColor: 'rgba(119, 36, 219, 0.2)', borderColor: 'rgb(119, 36, 219)', pointBackgroundColor: 'rgb(119, 36, 219)' },
-            { label: 'Drive', data: [5, 5, 1, 1, 1], fill: true, backgroundColor: 'rgba(80, 80, 80, 0.2)', borderColor: 'rgb(80, 80, 80)', pointBackgroundColor: 'rgb(80, 80, 80)' },
-            { label: 'Vids', data: [3, 2, 5, 1, 5], fill: true, backgroundColor: 'rgba(219, 68, 55, 0.2)', borderColor: 'rgb(219, 68, 55)', pointBackgroundColor: 'rgb(219, 68, 55)' },
-            { label: 'Canva Pro', data: [4, 3, 5, 1, 5], fill: true, backgroundColor: 'rgba(0, 202, 202, 0.2)', borderColor: 'rgb(0, 202, 202)', pointBackgroundColor: 'rgb(0, 202, 202)' },
-            { label: 'Sites', data: [4, 5, 5, 1, 5], fill: true, backgroundColor: 'rgba(255, 165, 0, 0.2)', borderColor: 'rgb(255, 165, 0)', pointBackgroundColor: 'rgb(255, 165, 0)' }, // New data for Sites
-        ]
-    };
+      document.getElementById('randomToolBtn').addEventListener('click', () => {
+        const keys = Object.keys(toolData);
+        const randomKey = keys[Math.floor(Math.random() * keys.length)];
+        displayTool(randomKey);
+      });
 
-    const config = {
+      displayTool('docs'); // inicial
+
+      new Chart(document.getElementById('toolComparisonChart').getContext('2d'), {
         type: 'radar',
-        data: chartData,
+        data: {
+          labels: ['Colaboração', 'Organização', 'Criação de Conteúdo', 'Avaliação', 'Apresentação Visual'],
+          datasets: [
+            { label: 'Docs', data: [5, 3, 4, 2, 2], backgroundColor: 'rgba(66, 133, 244, 0.2)', borderColor: 'rgb(66, 133, 244)', pointBackgroundColor: 'rgb(66, 133, 244)' },
+            { label: 'Planilhas', data: [4, 5, 2, 4, 3], backgroundColor: 'rgba(15, 157, 88, 0.2)', borderColor: 'rgb(15, 157, 88)', pointBackgroundColor: 'rgb(15, 157, 88)' },
+            { label: 'Apresentações', data: [5, 3, 4, 2, 5], backgroundColor: 'rgba(244, 180, 0, 0.2)', borderColor: 'rgb(244, 180, 0)', pointBackgroundColor: 'rgb(244, 180, 0)' },
+            { label: 'Formulários', data: [2, 4, 2, 5, 2], backgroundColor: 'rgba(119, 36, 219, 0.2)', borderColor: 'rgb(119, 36, 219)', pointBackgroundColor: 'rgb(119, 36, 219)' },
+            { label: 'Drive', data: [5, 5, 1, 1, 1], backgroundColor: 'rgba(80, 80, 80, 0.2)', borderColor: 'rgb(80, 80, 80)', pointBackgroundColor: 'rgb(80, 80, 80)' },
+            { label: 'Vids', data: [3, 2, 5, 1, 5], backgroundColor: 'rgba(219, 68, 55, 0.2)', borderColor: 'rgb(219, 68, 55)', pointBackgroundColor: 'rgb(219, 68, 55)' },
+            { label: 'Canva Pro', data: [4, 3, 5, 1, 5], backgroundColor: 'rgba(0, 202, 202, 0.2)', borderColor: 'rgb(0, 202, 202)', pointBackgroundColor: 'rgb(0, 202, 202)' },
+            { label: 'Sites', data: [4, 5, 5, 1, 5], backgroundColor: 'rgba(255, 165, 0, 0.2)', borderColor: 'rgb(255, 165, 0)', pointBackgroundColor: 'rgb(255, 165, 0)' }
+          ]
+        },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                r: {
-                    angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
-                    grid: { color: 'rgba(0, 0, 0, 0.1)' },
-                    pointLabels: { font: { size: 12, weight: '500' }, color: '#44403c' },
-                    ticks: {
-                        backdropColor: 'rgba(255, 255, 255, 0.75)',
-                        stepSize: 1,
-                        max: 5,
-                        min: 0
-                    }
-                }
-            },
-            plugins: {
-                legend: { position: 'top', labels: { usePointStyle: true, color: '#44403c'} },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) {
-                                label += ': ';
-                            }
-                            if (context.parsed.r !== null) {
-                                label += context.parsed.r + ' de 5';
-                            }
-                            return label;
-                        }
-                    }
-                }
-            },
-            elements: {
-                line: { borderWidth: 2 },
-                point: { pointRadius: 4, pointHoverRadius: 6 }
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+              grid: { color: 'rgba(0, 0, 0, 0.1)' },
+              pointLabels: { font: { size: 12, weight: '500' }, color: '#44403c' },
+              ticks: {
+                backdropColor: 'rgba(255, 255, 255, 0.75)',
+                stepSize: 1,
+                max: 5,
+                min: 0
+              }
             }
+          },
+          plugins: {
+            legend: { position: 'top', labels: { usePointStyle: true, color: '#44403c' } },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${context.parsed.r} de 5`;
+                }
+              }
+            }
+          },
+          elements: {
+            line: { borderWidth: 2 },
+            point: { pointRadius: 4, pointHoverRadius: 6 }
+          }
         }
-    };
-    
-    const ctx = document.getElementById('toolComparisonChart').getContext('2d');
-    new Chart(ctx, config);
-
-});
-</script>
-
+      });
+    });
+  </script>
 </body>
 </html>
